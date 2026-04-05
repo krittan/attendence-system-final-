@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFID Attendance Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+<header class="topbar">
+  <div>
+    <p class="eyebrow">IoT RFID Self Attendance System</p>
+    <h1>RFID Attendance Dashboard</h1>
+  </div>
+  <button type="button" id="logoutBtn" class="secondary-btn">Logout</button>
+</header>
+
+<main class="dashboard-shell">
+  <section class="stats-grid">
+    <article class="stat-card">
+      <p>Total Records</p>
+      <h2 id="totalRecords">0</h2>
+    </article>
+    <article class="stat-card">
+      <p>Students Present</p>
+      <h2 id="presentStudents">0</h2>
+    </article>
+    <article class="stat-card">
+      <p>Average Attendance</p>
+      <h2 id="averageAttendance">0%</h2>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h3>Attendance Table</h3>
+      <p>Live data fetched from your Google Apps Script API.</p>
+    </div>
+
+    <p id="dashboardMessage" class="status-message" aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table id="attendanceTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Attendance %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h3>Attendance Overview</h3>
+      <p>Quick comparison of attendance percentage across students.</p>
+    </div>
+    <canvas id="attendanceChart"></canvas>
+  </section>
+</main>
+
+<script src="login.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

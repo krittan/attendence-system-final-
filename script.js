@@ -1,9 +1,7 @@
-const url = "https://docs.google.com/spreadsheets/d/15sFmA_5fqoiD-pEX6FXCquwbw3n-hUERgWKs-Yis95Q/edit";
+const url = "https://script.google.com/macros/s/AKfycbxkEzexCVCe7toDL1l8gOAy9bfshMkXHZC9SE3inM5EBbnUp4UvGngTWDg3uQv6itXXWA/exec";
 const classDates = new Set();
-and:
 
 const classDate = student.date || student.classDate || student.day;
-and:
 
 const totalClasses = classDates.size;
 const attendedClasses = count[key].size;

@@ -1,4 +1,6 @@
-const url = "https://script.google.com/macros/s/AKfycbxDKhencP3nQ06Mq1aX01FrTpEz92I8ZZoXslnwRsE5ag180J4s7c-ZyVytyRqMyRNfQA/exec";
+const apiUrl = "https://script.google.com/macros/s/AKfycbxDKhencP3nQ06Mq1aX01FrTpEz92I8ZZoXslnwRsE5ag180J4s7c-ZyVytyRqMyRNfQA/exec";
+const url = `${apiUrl}?mode=read&t=${Date.now()}`;
+
 
 const tableBody = document.querySelector("#attendanceTable tbody");
 const dashboardMessage = document.getElementById("dashboardMessage");

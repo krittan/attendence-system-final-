@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbxkEzexCVCe7toDL1l8gOAy9bfshMkXHZC9SE3inM5EBbnUp4UvGngTWDg3uQv6itXXWA/exec?mode=read";
+const url = "https://script.google.com/macros/s/AKfycbxDKhencP3nQ06Mq1aX01FrTpEz92I8ZZoXslnwRsE5ag180J4s7c-ZyVytyRqMyRNfQA/exec";
 
 const tableBody = document.querySelector("#attendanceTable tbody");
 const dashboardMessage = document.getElementById("dashboardMessage");

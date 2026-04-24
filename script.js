@@ -1,17 +1,12 @@
-const url = "https://script.google.com/macros/s/AKfycbxkEzexCVCe7toDL1l8gOAy9bfshMkXHZC9SE3inM5EBbnUp4UvGngTWDg3uQv6itXXWA/exec";
-const classDates = new Set();
-
-const classDate = student.date || student.classDate || student.day;
-
-const totalClasses = classDates.size;
-const attendedClasses = count[key].size;
-const percent = totalClasses ? (attendedClasses / totalClasses) * 100 : 0;
+const url = "https://script.google.com/macros/s/AKfycbxkEzexCVCe7toDL1l8gOAy9bfshMkXHZC9SE3inM5EBbnUp4UvGngTWDg3uQv6itXXWA/exec?mode=read";
 
 const tableBody = document.querySelector("#attendanceTable tbody");
 const dashboardMessage = document.getElementById("dashboardMessage");
 const totalRecordsEl = document.getElementById("totalRecords");
 const presentStudentsEl = document.getElementById("presentStudents");
 const averageAttendanceEl = document.getElementById("averageAttendance");
+
+let attendanceChartInstance = null;
 
 if (tableBody) {
   loadAttendance();
@@ -28,6 +23,10 @@ function loadAttendance() {
       return res.json();
     })
     .then((data) => {
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data format received from Apps Script.");
+      }
+
       renderAttendance(data);
     })
     .catch((error) => {
@@ -36,64 +35,91 @@ function loadAttendance() {
 }
 
 function renderAttendance(data) {
-  const count = {};
+  const students = {};
+  const classSessions = new Set();
+
+  tableBody.innerHTML = "";
 
   data.forEach((student) => {
-    const key = `${student.name}_${student.roll}`;
+    const name = (student.name || "").trim();
+    const roll = (student.roll || "").trim();
 
-    if (!count[key]) {
-      count[key] = 0;
+    if (!name || !roll) {
+      return;
     }
 
-    count[key]++;
+    const classId =
+      student.classId ||
+      student.date ||
+      student.classDate ||
+      student.day;
+
+    if (!classId) {
+      throw new Error("Each record must include classId or date from Apps Script.");
+    }
+
+    const key = `${name}__${roll}`;
+
+    if (!students[key]) {
+      students[key] = {
+        name,
+        roll,
+        attendedClasses: new Set()
+      };
+    }
+
+    students[key].attendedClasses.add(classId);
+    classSessions.add(classId);
   });
 
+  const totalClasses = classSessions.size;
   const names = [];
   const percentages = [];
   let totalPercentage = 0;
 
-  tableBody.innerHTML = "";
+  Object.values(students).forEach((student) => {
+    const attendedCount = student.attendedClasses.size;
+    const percentage = totalClasses ? (attendedCount / totalClasses) * 100 : 0;
 
-  Object.keys(count).forEach((key) => {
-    const parts = key.split("_");
-    const name = parts[0];
-    const roll = parts[1];
-    const percent = (count[key] / totalClasses) * 100;
-
-    names.push(name);
-    percentages.push(percent);
-    totalPercentage += percent;
+    names.push(student.name);
+    percentages.push(percentage);
+    totalPercentage += percentage;
 
     const row = tableBody.insertRow();
-    row.insertCell(0).textContent = name;
-    row.insertCell(1).textContent = roll;
-    row.insertCell(2).textContent = `${percent.toFixed(1)}%`;
+    row.insertCell(0).textContent = student.name;
+    row.insertCell(1).textContent = student.roll;
+    row.insertCell(2).textContent = `${percentage.toFixed(1)}%`;
   });
 
-  updateStats(data.length, names.length, totalPercentage, names.length);
-  createChart(names, percentages);
+  updateStats(data.length, Object.keys(students).length, totalPercentage, totalClasses);
 
   if (names.length === 0) {
     setMessage("No attendance records found yet.");
+    destroyChart();
     return;
   }
 
-  setMessage(`Loaded ${data.length} attendance records successfully.`);
+  createChart(names, percentages);
+  setMessage(`Loaded ${data.length} attendance records across ${totalClasses} class sessions.`);
 }
 
-function updateStats(totalRecords, totalStudents, totalPercentage, studentCount) {
+function updateStats(totalRecords, totalStudents, totalPercentage, totalClasses) {
   if (totalRecordsEl) {
     totalRecordsEl.textContent = totalRecords;
   }
 
   if (presentStudentsEl) {
-    presentStudentsEl.textContent = totalStudents;
+    totalStudentsElText(totalStudents);
   }
 
   if (averageAttendanceEl) {
-    const average = studentCount ? totalPercentage / studentCount : 0;
+    const average = totalStudents ? totalPercentage / totalStudents : 0;
     averageAttendanceEl.textContent = `${average.toFixed(1)}%`;
   }
+}
+
+function totalStudentsElText(totalStudents) {
+  presentStudentsEl.textContent = totalStudents;
 }
 
 function createChart(names, percentages) {
@@ -103,7 +129,9 @@ function createChart(names, percentages) {
     return;
   }
 
-  new Chart(chartCanvas, {
+  destroyChart();
+
+  attendanceChartInstance = new Chart(chartCanvas, {
     type: "bar",
     data: {
       labels: names,
@@ -131,6 +159,13 @@ function createChart(names, percentages) {
       }
     }
   });
+}
+
+function destroyChart() {
+  if (attendanceChartInstance) {
+    attendanceChartInstance.destroy();
+    attendanceChartInstance = null;
+  }
 }
 
 function setMessage(message) {
